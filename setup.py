@@ -13,16 +13,16 @@ def get_long_description():
 
 
 setup(
-    name="asgi-proxy",
+    name="asgi-proxy-lib",
     description="An ASGI function for proxying to a backend over HTTP",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     author="Simon Willison",
-    url="https://github.com/simonw/asgi-proxy",
+    url="https://github.com/simonw/asgi-proxy-lib",
     project_urls={
-        "Issues": "https://github.com/simonw/asgi-proxy/issues",
-        "CI": "https://github.com/simonw/asgi-proxy/actions",
-        "Changelog": "https://github.com/simonw/asgi-proxy/releases",
+        "Issues": "https://github.com/simonw/asgi-proxy-lib/issues",
+        "CI": "https://github.com/simonw/asgi-proxy-lib/actions",
+        "Changelog": "https://github.com/simonw/asgi-proxy-lib/releases",
     },
     license="Apache License, Version 2.0",
     version=VERSION,
