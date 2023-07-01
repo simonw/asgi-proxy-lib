@@ -34,6 +34,8 @@ You can try this module out like so:
 ```bash
 python -m asgi_proxy https://datasette.io
 ```
+You may need to `pip install uvicorn` first for this to work.
+
 This will start a server on port 8000 that proxies to `https://datasette.io`.
 
 Add `-p PORT` to specify a different port, `--verbose` to see debug logging, and `--host 127.0.0.1` to listen on a different host (the default is `0.0.0.0`).
