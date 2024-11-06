@@ -13,9 +13,11 @@ def asgi_proxy(backend, log=None):
         query_string = scope["query_string"].decode()
 
         # Forward headers
-        headers = {k.decode(): v.decode() for k, v in scope.get("headers", [])}
+        headers = {k.decode().lower(): v.decode() for k, v in scope.get("headers", [])}
         # Replace host header
         headers["host"] = backend_host.encode()
+        # Ensure we don't get compressed content
+        headers["accept-encoding"] = "identity"
 
         url_bits = [backend, path]
         if query_string:
