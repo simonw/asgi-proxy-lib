@@ -1,8 +1,8 @@
-from httpx import AsyncClient
+import httpx
 from urllib.parse import urlparse
 
 
-def asgi_proxy(backend, log=None):
+def asgi_proxy(backend, log=None, timeout=None):
     backend_host = urlparse(backend).netloc
 
     async def asgi_proxy(scope, receive, send):
@@ -32,7 +32,7 @@ def asgi_proxy(backend, log=None):
             body += message.get("body", b"")
             more_body = message.get("more_body", False)
 
-        async with AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 # Stream it, in case of long streaming responses
                 async with client.stream(
@@ -74,10 +74,39 @@ def asgi_proxy(backend, log=None):
                         return
 
                     await send({"type": "http.response.body", "more_body": False})
-            except Exception as e:
+            except httpx.TimeoutException as ex:
+                if log:
+                    log.error(f"Timeout error occurred: {ex.__class__.__name__}: {ex}")
+                await send(
+                    {
+                        "type": "http.response.start",
+                        "status": 504,
+                    }
+                )
+                await send(
+                    {
+                        "type": "http.response.body",
+                        "body": b"Gateway timeout",
+                        "more_body": False,
+                    }
+                )
+            except Exception as ex:
                 # Handle any errors during the request
                 if log:
-                    log.error(f"An error occurred: {e.__class__.__name__}: {e}")
-                return
+                    log.error(f"An error occurred: {ex.__class__.__name__}: {ex}")
+                await send(
+                    {
+                        "type": "http.response.start",
+                        # Generic gateway error
+                        "status": 502,
+                    }
+                )
+                await send(
+                    {
+                        "type": "http.response.body",
+                        "body": b"Bad gateway",
+                        "more_body": False,
+                    }
+                )
 
     return asgi_proxy

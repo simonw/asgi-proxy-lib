@@ -27,6 +27,8 @@ Now `app` is an ASGI application that will proxy all incoming HTTP requests to t
 
 The function takes an optional second argument, `log=` - set this to a Python logger, or any object that has `.info(msg)` and `.error(msg)` methods, and the proxy will log information about each request it proxies.
 
+It also takes a `timeout=` option, which defaults to `None` for no timeout. This can be set to a floating point value in seconds to enforce a timeout on requests that are being proxied.
+
 ## CLI tool
 
 You can try this module out like so:
@@ -38,7 +40,7 @@ You may need to `pip install uvicorn` first for this to work.
 
 This will start a server on port 8000 that proxies to `https://datasette.io`.
 
-Add `-p PORT` to specify a different port, `--verbose` to see debug logging, and `--host 127.0.0.1` to listen on a different host (the default is `0.0.0.0`).
+Add `-p PORT` to specify a different port, `--timeout 3` to set a timeout, `--verbose` to see debug logging, and `--host 127.0.0.1` to listen on a different host (the default is `0.0.0.0`).
 
 ## Development
 
