@@ -6,7 +6,7 @@ def assert_all_responses_were_requested() -> bool:
     return False
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mock_backend(httpx_mock):
     httpx_mock.add_response(url="https://datasette.io/", text="<h1>datasette.io</h1>")
     httpx_mock.add_response(url="https://datasette.io/faq", text="FAQ goes here")
