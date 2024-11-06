@@ -29,5 +29,5 @@ setup(
     packages=["asgi_proxy"],
     install_requires=["httpx"],
     extras_require={"test": ["pytest", "pytest-asyncio", "pytest-httpx"]},
-    python_requires=">=3.8",
+    python_requires=">=3.9",
 )
