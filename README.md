@@ -38,6 +38,11 @@ python -m asgi_proxy https://datasette.io
 ```
 You may need to `pip install uvicorn` first for this to work.
 
+Alternatively, use [uv](https://github.com/astral-sh/uv) like this:
+```bash
+uv run --with uvicorn --with asgi-proxy-lib python -m asgi_proxy https://datasette.io
+```
+
 This will start a server on port 8000 that proxies to `https://datasette.io`.
 
 Add `-p PORT` to specify a different port, `--timeout 3` to set a timeout, `--verbose` to see debug logging, and `--host 127.0.0.1` to listen on a different host (the default is `0.0.0.0`).
