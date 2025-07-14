@@ -2,7 +2,9 @@ import httpx
 from urllib.parse import urlparse
 
 
-def asgi_proxy(backend, log=None, timeout=None):
+def asgi_proxy(
+    backend, log=None, timeout=None, log_request_body=None, log_response_body=None
+):
     backend_host = urlparse(backend).netloc
 
     async def asgi_proxy(scope, receive, send):
@@ -32,6 +34,10 @@ def asgi_proxy(backend, log=None, timeout=None):
             body += message.get("body", b"")
             more_body = message.get("more_body", False)
 
+        # Log request body if requested
+        if log_request_body:
+            log_request_body(body)
+
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 # Stream it, in case of long streaming responses
@@ -41,6 +47,10 @@ def asgi_proxy(backend, log=None, timeout=None):
                     if log:
                         log.info(f"Request: {method} {url}")
                         log.info(f"Response: {resp.status_code} {resp.reason_phrase}")
+
+                    # Initialize response body accumulator if needed
+                    response_body = b"" if log_response_body else None
+
                     # Start the response
                     await send(
                         {
@@ -57,6 +67,8 @@ def asgi_proxy(backend, log=None, timeout=None):
                         # aiter_raw not aiter_bytes because we don't want
                         # content decoding to have been applied
                         async for chunk in resp.aiter_raw():
+                            if log_response_body:
+                                response_body += chunk
                             await send(
                                 {
                                     "type": "http.response.body",
@@ -71,9 +83,18 @@ def asgi_proxy(backend, log=None, timeout=None):
                                 f"Client disconnected: {e.__class__.__name__}: {e}"
                             )
                         await send({"type": "http.response.body", "more_body": False})
+
+                        # Log response body even if client disconnected
+                        if log_response_body and response_body is not None:
+                            log_response_body(response_body)
                         return
 
                     await send({"type": "http.response.body", "more_body": False})
+
+                    # Log response body if requested
+                    if log_response_body and response_body is not None:
+                        log_response_body(response_body)
+
             except httpx.TimeoutException as ex:
                 if log:
                     log.error(f"Timeout error occurred: {ex.__class__.__name__}: {ex}")

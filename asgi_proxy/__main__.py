@@ -22,14 +22,31 @@ if __name__ == "__main__":
         "--timeout", type=float, default=None, help="Timeout in seconds"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
+    parser.add_argument(
+        "-b",
+        "--bodies",
+        action="store_true",
+        help="Log full request and response bodies",
+    )
 
     args = parser.parse_args()
 
-    if args.verbose:
+    if args.verbose or args.bodies:
         import logging
 
         logging.basicConfig(level=logging.INFO)
-        app = asgi_proxy(args.url, log=logging, timeout=args.timeout)
+        log_request_body = None
+        log_response_body = None
+        if args.bodies:
+            log_request_body = logging.info
+            log_response_body = logging.info
+        app = asgi_proxy(
+            args.url,
+            log=logging,
+            timeout=args.timeout,
+            log_request_body=log_request_body,
+            log_response_body=log_response_body,
+        )
     else:
         app = asgi_proxy(args.url, timeout=args.timeout)
 
